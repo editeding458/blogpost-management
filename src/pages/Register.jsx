@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./Register.css";
 
 const Register = () => {
@@ -77,7 +78,7 @@ const Register = () => {
     if (validate()) {
       const { confirmPassword, ...userData } = formData;
       localStorage.setItem("authData", JSON.stringify(userData));
-      alert("Registration successfully...!");
+      toast.success("Registration successfully...!");
       navigate("/Login");
     }
   };
@@ -88,7 +89,7 @@ const Register = () => {
       <h5>Join us and start journey</h5>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">Fullname</label>
           <input
             type="text"
             id="username"

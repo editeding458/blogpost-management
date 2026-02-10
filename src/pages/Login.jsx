@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./Login.css";
 
 const Login = () => {
@@ -60,9 +61,9 @@ const Login = () => {
       ) {
         localStorage.setItem("loginData", JSON.stringify(loginData));
         navigate("/Dashboard");
-        alert("Login successfully...!");
+        toast.success("Login successfully");
       } else {
-        alert("invalid email or password");
+        toast.error("invalid email or password");
       }
     }
   };
