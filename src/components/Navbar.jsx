@@ -2,7 +2,11 @@ import { FaBlog, FaHome, FaPlusSquare, FaSignOutAlt } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import "./Navbar.css";
 
-const Navbar = () => {
+const Navbar = ({ onLogout }) => {
+  // Get user email from localStorage to display
+  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  const userName = loginData?.email?.split("@")[0] || "User";
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -22,9 +26,9 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-actions">
-          <span className="user-name">Hi, User</span>
+          <span className="user-name">Hi, {userName}</span>
 
-          <button className="logout-btn">
+          <button className="logout-btn" onClick={onLogout}>
             <FaSignOutAlt /> Logout
           </button>
         </div>
@@ -33,4 +37,4 @@ const Navbar = () => {
   );
 };
 
-export default  Navbar;
+export default Navbar;

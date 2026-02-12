@@ -1,12 +1,21 @@
 import { FaPlus } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 import "./Dashboard.css";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("loginData");
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
+
   return (
     <div className="dashboard-page">
-      <Navbar />
+      <Navbar onLogout={handleLogout} />
 
       <main className="dashboard-main">
         <div className="dashboard-welcome">
@@ -48,8 +57,8 @@ const Dashboard = () => {
             <div className="post-card">
               <div className="post-image-container">
                 <img src="" alt="Post" className="post-card-image" />
-                <div className="post-actions">
 
+                <div className="post-actions">
                   <button className="action-btn edit-btn" title="Edit Post">
                     <MdEdit size={22} color="#ffffff" />
                   </button>
@@ -57,7 +66,6 @@ const Dashboard = () => {
                   <button className="action-btn delete-btn" title="Delete Post">
                     <MdDelete size={20} color="#ffffff" />
                   </button>
-
                 </div>
               </div>
 
@@ -66,7 +74,7 @@ const Dashboard = () => {
                   <span className="post-author">By Admin</span>
                   <span className="post-date">Recent</span>
                 </div>
-                
+
                 <h3 className="post-card-title">Sample Post Title</h3>
                 <p className="post-card-description">
                   This is a sample static description to maintain the UI design
@@ -75,6 +83,7 @@ const Dashboard = () => {
                 <button className="read-more-btn">Read More</button>
               </div>
             </div>
+
             <div className="post-card">
               <div className="post-image-container">
                 <img src="" alt="Post" className="post-card-image" />
@@ -82,6 +91,7 @@ const Dashboard = () => {
                   <button className="action-btn edit-btn">
                     <MdEdit size={20} color="#ffffff" />
                   </button>
+
                   <button className="action-btn delete-btn">
                     <MdDelete size={22} color="#ffffff" />
                   </button>
@@ -92,6 +102,7 @@ const Dashboard = () => {
                   <span className="post-author">By User</span>
                   <span className="post-date">Recent</span>
                 </div>
+
                 <h3 className="post-card-title">Another Static Post</h3>
                 <p className="post-card-description">
                   Static content example to keep the dashboard layout and styles
