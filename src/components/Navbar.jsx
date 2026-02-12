@@ -5,7 +5,7 @@ import "./Navbar.css";
 const Navbar = ({ onLogout }) => {
   // Get user email from localStorage to display
   const authData = JSON.parse(localStorage.getItem("authData") || "{}");
-  const userName = authData?.username?.split("@")[0] || "User";
+  const userName = authData?.username|| "User";
 
   return (
     <nav className="navbar">
