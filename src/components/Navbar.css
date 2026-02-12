@@ -54,13 +54,9 @@
 .navbar-links {
   display: flex;
   gap: 1.5rem;
-    background: #fee2e2;
+    
 }
-.navbar-links:hover{
-  font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-}
+
 
 .navbar-item {
   text-decoration: none;
