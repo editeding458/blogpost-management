@@ -1,0 +1,30 @@
+{
+    "posts":[
+ {
+    "id":"1",
+    "title":"Title 1",
+    "description":"simple static exmple",
+    "author":"nandan",
+    "image":"https://avatars.mds.yandex.net/i?id=f6a2cbc716928af0a7b6250be30b638d1b7b5270-5858200-images-thumbs&n=13",
+    "createdAt":"2026-02-12T10:41:07.837Z"
+ },
+
+ {
+    "id":"2",
+    "title":"Title 1",
+    "description":"simple static exmple",
+    "author":"nandan",
+    "image":"https://avatars.mds.yandex.net/i?id=f6a2cbc716928af0a7b6250be30b638d1b7b5270-5858200-images-thumbs&n=13",
+    "createdAt":"2026-02-12T10:41:07.837Z"
+ },
+
+ {
+    "id":"3",
+    "title":"Title 1",
+    "description":"simple static exmple",
+    "author":"nandan",
+    "image":"https://avatars.mds.yandex.net/i?id=f6a2cbc716928af0a7b6250be30b638d1b7b5270-5858200-images-thumbs&n=13",
+    "createdAt":"2026-02-12T10:41:07.837Z"
+ }
+]
+}
