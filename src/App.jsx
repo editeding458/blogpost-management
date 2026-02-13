@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
 import AuthGuard from './auth/AuthGuard';
+import CreatePost from './pages/CreatePost'; // Add this import
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -28,13 +29,22 @@ function App() {
             </AuthGuard>
           }
         />
+        {/* Add this route for CreatePost */}
+        <Route
+          path="/create-post"
+          element={
+            <AuthGuard required={true}>
+              <CreatePost />
+            </AuthGuard>
+          }
+        />
         <Route path="/" element={
           <AuthGuard required={false}>
             <Login />
           </AuthGuard>
         } />
       </Routes>
-       <ToastContainer
+      <ToastContainer
         position='top-right'
         autoClose={1000}
         hideProgressBar={false}

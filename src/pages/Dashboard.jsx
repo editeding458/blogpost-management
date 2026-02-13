@@ -11,6 +11,11 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const handleCreatePostClick = (e) => {
+    e.preventDefault();
+    navigate("/create-post");
+   }
+
   // Fetch all posts from db.json
   const fetchPosts = async () => {
     try {
@@ -57,7 +62,7 @@ const Dashboard = () => {
   // Calculate stats
   const totalPosts = posts.length;
   const userPosts = posts.filter(
-    (post) => post.author?.toLowerCase() === currentUser.toLowerCase()
+    (post) => post.author?.toLowerCase() === currentUser.toLowerCase(),
   ).length;
   const communityPosts = totalPosts - userPosts;
 
@@ -68,7 +73,7 @@ const Dashboard = () => {
       <main className="dashboard-main">
         <div className="dashboard-welcome">
           <div className="welcome-text">
-            <h1>Welcome to Your Dashboard</h1>
+            <h1>Welcome to Your Dashboard.</h1>
             <p>
               Manage your posts, track engagement, and connect with your
               audience.
@@ -96,7 +101,7 @@ const Dashboard = () => {
         <section className="posts-section">
           <div className="section-header">
             <h2 className="section-title">Recent Feed</h2>
-            <button className="create-shortcut-btn">
+            <button className="create-shortcut-btn"  onClick={handleCreatePostClick}>
               <FaPlus /> New Post
             </button>
           </div>
@@ -109,16 +114,13 @@ const Dashboard = () => {
                 <div className="post-card" key={post.id}>
                   <div className="post-image-container">
                     <img
-                      src={post.image }
+                      src={post.image}
                       alt={post.title}
                       className="post-card-image"
                     />
 
                     <div className="post-actions">
-                      <button
-                        className="action-btn edit-btn"
-                        title="Edit Post"
-                      >
+                      <button className="action-btn edit-btn" title="Edit Post">
                         <MdEdit size={22} color="#ffffff" />
                       </button>
 
@@ -134,9 +136,14 @@ const Dashboard = () => {
 
                   <div className="post-card-content">
                     <div className="post-meta">
-                      <span className="post-author">By {post.author || "Anonymous"}</span>
+                      <span className="post-author">
+                        By {post.author || "Anonymous"}
+                      </span>
                       <span className="post-date">
-                        {post.date || new Date(post.createdAt || Date.now()).toLocaleDateString()}
+                        {post.date ||
+                          new Date(
+                            post.createdAt || Date.now(),
+                          ).toLocaleDateString()}
                       </span>
                     </div>
 
