@@ -16,6 +16,13 @@ const Dashboard = () => {
     navigate("/create-post");
    }
 
+   // This part is already correct in your Dashboard.jsx
+const handleEditPost = (post) => {
+  navigate("/create-post", { 
+    state: { post, isEditing: true } 
+  });
+};
+
   // Fetch all posts from db.json
   const fetchPosts = async () => {
     try {
@@ -120,7 +127,9 @@ const Dashboard = () => {
                     />
 
                     <div className="post-actions">
-                      <button className="action-btn edit-btn" title="Edit Post">
+                      <button className="action-btn edit-btn" title="Edit Post"
+                      onClick={() => handleEditPost(post)}
+                        >
                         <MdEdit size={22} color="#ffffff" />
                       </button>
 

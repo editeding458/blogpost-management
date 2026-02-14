@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FaCloudUploadAlt,
   FaHeading,
@@ -7,43 +7,99 @@ import {
   FaTimes,
   FaUser,
 } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 import "./CreatePost.css";
 
 const CreatePost = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editPost = location.state?.post;
+  const isEditing = location.state?.isEditing || false;
   
-  // Get current user from localStorage
   const authData = JSON.parse(localStorage.getItem("authData") || "{}");
-
-  
   
   const [formData, setFormData] = useState({
     title: "",
-    author: authData?.username||'', // Automatically set from dashboard username
+    author: authData?.username || '',
     description: "",
     imageUrl: "",
-    imageType:"url"
+    imageTab: "url"
   });
-  const [imageTab, setImageTab] = useState("url");
-  const fileInputRef=useRef(null);
+  const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditing && editPost) {
+      setFormData({
+        title: editPost.title || "",
+        author: editPost.author || authData?.username || '',
+        description: editPost.description || "",
+        imageUrl: editPost.image || "",
+        imageTab: "url"
+      });
+      setImagePreview(editPost.image || null);
+    }
+  }, [isEditing, editPost, authData?.username]);
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Post title is required.";
+    } else if (formData.title.length < 3) {
+      newErrors.title = "Minimum 3 characters required.";
+    }
+
+    if (!formData.author.trim()) {
+      newErrors.author = "Author name is required.";
+    } else if (formData.author.length < 2) {
+      newErrors.author = "Minimum 2 characters required.";
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required.";
+    } else if (formData.description.length < 10) {
+      newErrors.description = "Minimum 10 characters required.";
+    }
+
+    if (!formData.imageUrl.trim()) {
+      newErrors.imageUrl = "Cover image is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    if (errors[e.target.name]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: "",
+      });
+    }
   };
 
   const handleImageUrlChange = (e) => {
     const url = e.target.value;
     setFormData({ ...formData, imageUrl: url });
+    if (errors.imageUrl) {
+      setErrors({
+        ...errors,
+        imageUrl: "",
+      });
+    }
     if (url) {
       setImagePreview(url);
+    } else {
+      setImagePreview(null);
     }
   };
 
@@ -53,67 +109,109 @@ const CreatePost = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        setFormData({ ...formData, imageUrl: reader.result });
+        setFormData(prev => ({ ...prev, imageUrl: reader.result }));
+        if (errors.imageUrl) {
+          setErrors({
+            ...errors,
+            imageUrl: "",
+          });
+        }
       };
       reader.readAsDataURL(file);
     }
   };
+  
+  const triggerFileSelect = () => {
+    fileInputRef.current.click();
+  };
 
   const removeImage = () => {
     setImagePreview(null);
-    setFormData({ ...formData, imageUrl: "" });
+    setFormData(prev => ({ ...prev, imageUrl: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validate()) {
+      toast.error("Please fix the errors in the form.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
-      const newPost = {
+      const postData = {
         title: formData.title,
-        author: formData.author || defaultAuthor, // Use form author or default
+        author: formData.author || authData?.username || 'Anonymous',
         description: formData.description,
-        image: formData.imageUrl || "https://via.placeholder.com/600x400",
+        image: formData.imageUrl,
         date: new Date().toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
         }),
-        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
-      const response = await fetch("http://localhost:3000/posts", {
-        method: "POST",
+      if (isEditing && editPost) {
+        postData.createdAt = editPost.createdAt || new Date().toISOString();
+      } else {
+        postData.createdAt = new Date().toISOString();
+      }
+
+      let url = "http://localhost:3000/posts";
+      let method = "POST";
+
+      if (isEditing && editPost?.id) {
+        url = `http://localhost:3000/posts/${editPost.id}`;
+        method = "PUT";
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newPost),
+        body: JSON.stringify(postData),
       });
 
       if (response.ok) {
-        toast.success("Post created successfully!");
+        toast.success(isEditing ? "Post updated successfully!" : "Post created successfully!");
         navigate("/dashboard");
       } else {
-        throw new Error("Failed to create post");
+        throw new Error(isEditing ? "Failed to update post" : "Failed to create post");
       }
     } catch (error) {
-      console.error("Error creating post:", error);
-      toast.error("Failed to create post");
+      console.error("Error saving post:", error);
+      toast.error(isEditing ? "Failed to update post" : "Failed to create post");
     } finally {
       setLoading(false);
     }
   };
 
   const handleClearForm = () => {
-    setFormData({
-      title: "",
-      author: authData?.username||'', // Reset to default author instead of empty string
-      description: "",
-      imageUrl: "",
-      imageType:"url",
-    });
-    setImagePreview(null);
-    toast.info("Form cleared");
+    if (isEditing && editPost) {
+      setFormData({
+        title: editPost.title || "",
+        author: editPost.author || authData?.username || '',
+        description: editPost.description || "",
+        imageUrl: editPost.image || "",
+        imageTab: "url"
+      });
+      setImagePreview(editPost.image || null);
+    } else {
+      setFormData({
+        title: "",
+        author: authData?.username || '',
+        description: "",
+        imageUrl: "",
+        imageTab: "url",
+      });
+      setImagePreview(null);
+    }
+    setErrors({});
+    toast.info("Form reset");
   };
 
   return (
@@ -125,14 +223,14 @@ const CreatePost = () => {
 
       <div className="create-post-container">
         <header className="form-header">
-          <h1>Create New Post</h1>
-          <p>Share your thoughts and stories with the world</p>
+          <h1>{isEditing ? "Edit Post" : "Create New Post"}</h1>
+          <p>{isEditing ? "Update your thoughts and stories" : "Share your thoughts and stories with the world"}</p>
         </header>
 
         <div className="post-form-card">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Post Title</label>
+              <label>Post Title <span className="required-star">*</span></label>
               <div className="input-wrapper">
                 <FaHeading className="input-icon" />
                 <input 
@@ -140,15 +238,15 @@ const CreatePost = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="form-control"
+                  className={`form-control ${errors.title ? 'error' : ''}`}
                   placeholder="Enter a catchy title..."
-                  required
                 />
               </div>
+              {errors.title && <span className="error-msg">{errors.title}</span>}
             </div>
 
             <div className="form-group">
-              <label>Author Name</label>
+              <label>Author Name <span className="required-star">*</span></label>
               <div className="input-wrapper">
                 <FaUser className="input-icon" />
                 <input
@@ -156,78 +254,81 @@ const CreatePost = () => {
                   name="author"
                   value={formData.author}
                   onChange={handleChange}
-                  className="form-control"
+                  className={`form-control ${errors.author ? 'error' : ''}`}
                   placeholder="Your name"
                 />
               </div>
+              {errors.author && <span className="error-msg">{errors.author}</span>}
             </div>
 
             <div className="form-group">
-              <label>Description</label>
+              <label>Description <span className="required-star">*</span></label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className="form-control"
+                className={`form-control ${errors.description ? 'error' : ''}`}
                 placeholder="What's on your mind? Write your story here."
-                required
+                rows="6"
               ></textarea>
+              {errors.description && <span className="error-msg">{errors.description}</span>}
             </div>
 
             <div className="form-group">
-              <label>Cover Image</label>
+              <label>Cover Image <span className="required-star">*</span></label>
+              
+              {!imagePreview ? (
+                <>
+                  <div className="image-source-tabs">
+                    <button
+                      type="button"
+                      className={`tab-btn ${formData.imageTab === 'url' ? 'active' : ''}`}
+                      onClick={() => setFormData({...formData, imageTab: "url"})}
+                    >
+                      Image URL
+                    </button>
+                    <button
+                      type="button"
+                      className={`tab-btn ${formData.imageTab === 'upload' ? 'active' : ''}`}
+                      onClick={() => setFormData({...formData, imageTab: "upload"})}
+                    >
+                      Upload File
+                    </button>
+                  </div>
 
-  
+                  {formData.imageTab === 'url' && (
+                    <div className="input-wrapper">
+                      <FaLink className="input-icon" />
+                      <input
+                        type="url"
+                        name="imageUrl"
+                        value={formData.imageUrl}
+                        onChange={handleImageUrlChange}
+                        className={`form-control ${errors.imageUrl ? 'error' : ''}`}
+                        placeholder="Paste image URL here..."
+                      />
+                    </div>
+                  )}
 
-              <div className="image-source-tabs">
-                <button
-                  type="button"
-                  className={`tab-btn ${formData.imageTab==='url'? 'active':''}`}
-                  onClick={() => setImageTab("url")}
-                >
-                  Image URL
-                </button>
-                <button
-                  type="button"
-                   className={`tab-btn ${formData.imageTab==='upload'? 'active':''}`}
-                  onClick={() => setImageTab("upload")}
-                >
-                  Upload File
-                </button>
-            </div>
-
-              {imageTab === "url" && (
-                <div className="input-wrapper">
-                  <FaLink className="input-icon" />
-                  <input
-                    type="url"
-                    name="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={handleImageUrlChange}
-                    className="form-control"
-                    placeholder="Paste image URL here. (e.g. https://...)"
-                  />
-                </div>
-              )}
-
-              {imageTab === "upload" && (
-                <div 
-                  className="image-upload-area"
-                  onClick={() => document.getElementById("imageUpload").click()}
-                >
-                  <FaCloudUploadAlt className="upload-icon" />
-                  <p>Click to upload image from your device</p>
-                  <input
-                    id="imageUpload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    style={{ display: "none" }}
-                  />
-                </div>
-              )}
-
-              {imagePreview && (
+                  {formData.imageTab === 'upload' && (
+                    <div 
+                      className={`image-upload-area ${errors.imageUrl ? 'error' : ''}`}
+                      onClick={triggerFileSelect}
+                    >
+                      <FaCloudUploadAlt className="upload-icon" />
+                      <p>Click to upload image from your device</p>
+                      <input
+                        ref={fileInputRef}
+                        id="imageUpload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: "none" }}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
                 <div className="image-preview-container">
                   <img src={imagePreview} alt="Preview" className="image-preview" />
                   <button
@@ -239,6 +340,7 @@ const CreatePost = () => {
                   </button>
                 </div>
               )}
+              {errors.imageUrl && <span className="error-msg">{errors.imageUrl}</span>}
             </div>
 
             <div className="form-actions-row">
@@ -247,14 +349,18 @@ const CreatePost = () => {
                 className="submit-btn"
                 disabled={loading}
               >
-                <FaRegPaperPlane /> {loading ? "Publishing..." : "Publish Post"}
+                <FaRegPaperPlane /> 
+                {loading 
+                  ? (isEditing ? "Updating..." : "Publishing...") 
+                  : (isEditing ? "Update Post" : "Publish Post")
+                }
               </button>
               <button 
                 type="button" 
                 className="cancel-btn"
                 onClick={handleClearForm}
               >
-                Clear Form
+                Reset Form
               </button>
             </div>
           </form>

@@ -5,9 +5,15 @@ import "./Navbar.css";
 const Navbar = ({ onLogout }) => {
   const navigate = useNavigate();
   
-  // Get user email from localStorage to display
-  const authData = JSON.parse(localStorage.getItem("authData") || "{}");
-  const userName = authData?.username || "User";
+  // Get current logged in user from loginData instead
+  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  
+  // Get all users from authData
+  const allUsers = JSON.parse(localStorage.getItem("authData") || "[]");
+  
+  // Find the current logged in user by email
+  const currentUser = allUsers.find(user => user.email === loginData.email);
+  const userName = currentUser?.username || "User";
 
   const handleCreatePostClick = (e) => {
     e.preventDefault();
