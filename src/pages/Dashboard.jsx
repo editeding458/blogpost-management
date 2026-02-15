@@ -14,14 +14,12 @@ const Dashboard = () => {
   const handleCreatePostClick = (e) => {
     e.preventDefault();
     navigate("/create-post");
-   }
+  };
 
-   // This part is already correct in your Dashboard.jsx
-const handleEditPost = (post) => {
-  navigate("/create-post", { 
-    state: { post, isEditing: true } 
-  });
-};
+  // FIXED: Corrected function syntax - removed extra comma and invalid onClick
+  const handleEditPost = (post) => {
+    navigate(`/edit-post/${post.id}`);
+  };
 
   // Fetch all posts from db.json
   const fetchPosts = async () => {
@@ -64,13 +62,32 @@ const handleEditPost = (post) => {
 
   // Get current user from localStorage
   const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
-  const currentUser = loginData?.email?.split("@")[0] || "User";
+  const authData = JSON.parse(localStorage.getItem("authData") || "{}");
+  
+  // Get username from multiple possible sources
+  let currentUser = "";
+  
+  if (authData?.username) {
+    currentUser = authData.username;
+  } else if (loginData?.email) {
+    currentUser = loginData.email.split("@")[0];
+  } else if (loginData?.username) {
+    currentUser = loginData.username;
+  }
 
   // Calculate stats
   const totalPosts = posts.length;
-  const userPosts = posts.filter(
-    (post) => post.author?.toLowerCase() === currentUser.toLowerCase(),
-  ).length;
+  
+  const userPosts = posts.filter((post) => {
+    if (!currentUser) return false;
+    
+    const postAuthor = (post.author || "").toLowerCase().trim();
+    const currentUserLower = currentUser.toLowerCase().trim();
+    
+    // Check if post author matches current user
+    return postAuthor === currentUserLower;
+  }).length;
+  
   const communityPosts = totalPosts - userPosts;
 
   return (
@@ -80,7 +97,7 @@ const handleEditPost = (post) => {
       <main className="dashboard-main">
         <div className="dashboard-welcome">
           <div className="welcome-text">
-            <h1>Welcome to Your Dashboard.</h1>
+            <h1>Welcome to Your Dashboard!</h1>
             <p>
               Manage your posts, track engagement, and connect with your
               audience.
@@ -108,7 +125,10 @@ const handleEditPost = (post) => {
         <section className="posts-section">
           <div className="section-header">
             <h2 className="section-title">Recent Feed</h2>
-            <button className="create-shortcut-btn"  onClick={handleCreatePostClick}>
+            <button
+              className="create-shortcut-btn"
+              onClick={handleCreatePostClick}
+            >
               <FaPlus /> New Post
             </button>
           </div>
@@ -127,9 +147,11 @@ const handleEditPost = (post) => {
                     />
 
                     <div className="post-actions">
-                      <button className="action-btn edit-btn" title="Edit Post"
-                      onClick={() => handleEditPost(post)}
-                        >
+                      <button
+                        className="action-btn edit-btn"
+                        title="Edit Post"
+                        onClick={() => handleEditPost(post)}
+                      >
                         <MdEdit size={22} color="#ffffff" />
                       </button>
 

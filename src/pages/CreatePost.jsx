@@ -17,55 +17,68 @@ const CreatePost = () => {
   const location = useLocation();
   const editPost = location.state?.post;
   const isEditing = location.state?.isEditing || false;
-  
-  const authData = JSON.parse(localStorage.getItem("authData") || "{}");
-  
+
+  // Get current logged in user from loginData
+  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
+
+  // Get all users from authData
+  const allUsers = JSON.parse(localStorage.getItem("authData") || "[]");
+
+  // Find the current logged in user by email
+  const currentUser = allUsers.find((user) => user.email === loginData.email);
+  const userName = currentUser?.username || "";
+
   const [formData, setFormData] = useState({
     title: "",
-    author: authData?.username || '',
+    author: userName,
     description: "",
     imageUrl: "",
-    imageTab: "url"
+    imageTab: "url",
   });
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Load post data if editing
   useEffect(() => {
     if (isEditing && editPost) {
       setFormData({
         title: editPost.title || "",
-        author: editPost.author || authData?.username || '',
+        author: editPost.author || userName,
         description: editPost.description || "",
         imageUrl: editPost.image || "",
-        imageTab: "url"
+        imageTab: "url",
       });
       setImagePreview(editPost.image || null);
     }
-  }, [isEditing, editPost, authData?.username]);
+  }, [isEditing, editPost, userName]);
 
   const validate = () => {
     const newErrors = {};
 
+    // Title validation
     if (!formData.title.trim()) {
       newErrors.title = "Post title is required.";
     } else if (formData.title.length < 3) {
       newErrors.title = "Minimum 3 characters required.";
     }
 
+    // Author validation
     if (!formData.author.trim()) {
       newErrors.author = "Author name is required.";
     } else if (formData.author.length < 2) {
       newErrors.author = "Minimum 2 characters required.";
     }
 
+    // Description validation
     if (!formData.description.trim()) {
       newErrors.description = "Description is required.";
     } else if (formData.description.length < 10) {
       newErrors.description = "Minimum 10 characters required.";
     }
 
+    // Image validation
     if (!formData.imageUrl.trim()) {
       newErrors.imageUrl = "Cover image is required.";
     }
@@ -79,6 +92,7 @@ const CreatePost = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error for this field
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -90,6 +104,7 @@ const CreatePost = () => {
   const handleImageUrlChange = (e) => {
     const url = e.target.value;
     setFormData({ ...formData, imageUrl: url });
+    // Clear image error
     if (errors.imageUrl) {
       setErrors({
         ...errors,
@@ -109,7 +124,8 @@ const CreatePost = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        setFormData(prev => ({ ...prev, imageUrl: reader.result }));
+        setFormData((prev) => ({ ...prev, imageUrl: reader.result }));
+        // Clear image error
         if (errors.imageUrl) {
           setErrors({
             ...errors,
@@ -120,30 +136,31 @@ const CreatePost = () => {
       reader.readAsDataURL(file);
     }
   };
-  
+
   const triggerFileSelect = () => {
     fileInputRef.current.click();
   };
 
   const removeImage = () => {
     setImagePreview(null);
-    setFormData(prev => ({ ...prev, imageUrl: '' }));
+    setFormData((prev) => ({ ...prev, imageUrl: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
+    // Validate form before submission
     if (!validate()) {
       toast.error("Please fix the errors in the form.");
       return;
     }
-    
+
     setLoading(true);
 
     try {
       const postData = {
         title: formData.title,
-        author: formData.author || authData?.username || 'Anonymous',
+        author: formData.author || userName || "Anonymous",
         description: formData.description,
         image: formData.imageUrl,
         date: new Date().toLocaleDateString("en-US", {
@@ -177,14 +194,22 @@ const CreatePost = () => {
       });
 
       if (response.ok) {
-        toast.success(isEditing ? "Post updated successfully!" : "Post created successfully!");
+        toast.success(
+          isEditing
+            ? "Post updated successfully!"
+            : "Post created successfully!",
+        );
         navigate("/dashboard");
       } else {
-        throw new Error(isEditing ? "Failed to update post" : "Failed to create post");
+        throw new Error(
+          isEditing ? "Failed to update post" : "Failed to create post",
+        );
       }
     } catch (error) {
       console.error("Error saving post:", error);
-      toast.error(isEditing ? "Failed to update post" : "Failed to create post");
+      toast.error(
+        isEditing ? "Failed to update post" : "Failed to create post",
+      );
     } finally {
       setLoading(false);
     }
@@ -194,16 +219,16 @@ const CreatePost = () => {
     if (isEditing && editPost) {
       setFormData({
         title: editPost.title || "",
-        author: editPost.author || authData?.username || '',
+        author: editPost.author || userName,
         description: editPost.description || "",
         imageUrl: editPost.image || "",
-        imageTab: "url"
+        imageTab: "url",
       });
       setImagePreview(editPost.image || null);
     } else {
       setFormData({
         title: "",
-        author: authData?.username || '',
+        author: userName,
         description: "",
         imageUrl: "",
         imageTab: "url",
@@ -216,37 +241,49 @@ const CreatePost = () => {
 
   return (
     <div className="create-post-page">
-      <Navbar onLogout={() => {
-        localStorage.removeItem("loginData");
-        navigate("/login");
-      }} />
+      <Navbar
+        onLogout={() => {
+          localStorage.removeItem("loginData");
+          navigate("/login");
+        }}
+      />
 
       <div className="create-post-container">
         <header className="form-header">
           <h1>{isEditing ? "Edit Post" : "Create New Post"}</h1>
-          <p>{isEditing ? "Update your thoughts and stories" : "Share your thoughts and stories with the world"}</p>
+          <p>
+            {isEditing
+              ? "Update your thoughts and stories"
+              : "Share your thoughts and stories with the world"}
+          </p>
         </header>
 
         <div className="post-form-card">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Post Title <span className="required-star">*</span></label>
+              <label>
+                Post Title <span className="required-star">*</span>
+              </label>
               <div className="input-wrapper">
                 <FaHeading className="input-icon" />
-                <input 
+                <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className={`form-control ${errors.title ? 'error' : ''}`}
+                  className={`form-control ${errors.title ? "error" : ""}`}
                   placeholder="Enter a catchy title..."
                 />
               </div>
-              {errors.title && <span className="error-msg">{errors.title}</span>}
+              {errors.title && (
+                <span className="error-msg">{errors.title}</span>
+              )}
             </div>
 
             <div className="form-group">
-              <label>Author Name <span className="required-star">*</span></label>
+              <label>
+                Author Name <span className="required-star">*</span>
+              </label>
               <div className="input-wrapper">
                 <FaUser className="input-icon" />
                 <input
@@ -254,49 +291,61 @@ const CreatePost = () => {
                   name="author"
                   value={formData.author}
                   onChange={handleChange}
-                  className={`form-control ${errors.author ? 'error' : ''}`}
+                  className={`form-control ${errors.author ? "error" : ""}`}
                   placeholder="Your name"
                 />
               </div>
-              {errors.author && <span className="error-msg">{errors.author}</span>}
+              {errors.author && (
+                <span className="error-msg">{errors.author}</span>
+              )}
             </div>
 
             <div className="form-group">
-              <label>Description <span className="required-star">*</span></label>
+              <label>
+                Description <span className="required-star">*</span>
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className={`form-control ${errors.description ? 'error' : ''}`}
+                className={`form-control ${errors.description ? "error" : ""}`}
                 placeholder="What's on your mind? Write your story here."
                 rows="6"
               ></textarea>
-              {errors.description && <span className="error-msg">{errors.description}</span>}
+              {errors.description && (
+                <span className="error-msg">{errors.description}</span>
+              )}
             </div>
 
             <div className="form-group">
-              <label>Cover Image <span className="required-star">*</span></label>
-              
+              <label>
+                Cover Image <span className="required-star">*</span>
+              </label>
+
               {!imagePreview ? (
                 <>
                   <div className="image-source-tabs">
                     <button
                       type="button"
-                      className={`tab-btn ${formData.imageTab === 'url' ? 'active' : ''}`}
-                      onClick={() => setFormData({...formData, imageTab: "url"})}
+                      className={`tab-btn ${formData.imageTab === "url" ? "active" : ""}`}
+                      onClick={() =>
+                        setFormData({ ...formData, imageTab: "url" })
+                      }
                     >
                       Image URL
                     </button>
                     <button
                       type="button"
-                      className={`tab-btn ${formData.imageTab === 'upload' ? 'active' : ''}`}
-                      onClick={() => setFormData({...formData, imageTab: "upload"})}
+                      className={`tab-btn ${formData.imageTab === "upload" ? "active" : ""}`}
+                      onClick={() =>
+                        setFormData({ ...formData, imageTab: "upload" })
+                      }
                     >
                       Upload File
                     </button>
                   </div>
 
-                  {formData.imageTab === 'url' && (
+                  {formData.imageTab === "url" && (
                     <div className="input-wrapper">
                       <FaLink className="input-icon" />
                       <input
@@ -304,15 +353,15 @@ const CreatePost = () => {
                         name="imageUrl"
                         value={formData.imageUrl}
                         onChange={handleImageUrlChange}
-                        className={`form-control ${errors.imageUrl ? 'error' : ''}`}
-                        placeholder="Paste image URL here..."
+                        className={`form-control ${errors.imageUrl ? "error" : ""}`}
+                        placeholder="Paste image URL here (e.g., https://...)"
                       />
                     </div>
                   )}
 
-                  {formData.imageTab === 'upload' && (
-                    <div 
-                      className={`image-upload-area ${errors.imageUrl ? 'error' : ''}`}
+                  {formData.imageTab === "upload" && (
+                    <div
+                      className={`image-upload-area ${errors.imageUrl ? "error" : ""}`}
                       onClick={triggerFileSelect}
                     >
                       <FaCloudUploadAlt className="upload-icon" />
@@ -330,7 +379,11 @@ const CreatePost = () => {
                 </>
               ) : (
                 <div className="image-preview-container">
-                  <img src={imagePreview} alt="Preview" className="image-preview" />
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="image-preview"
+                  />
                   <button
                     type="button"
                     className="remove-image-btn"
@@ -340,23 +393,24 @@ const CreatePost = () => {
                   </button>
                 </div>
               )}
-              {errors.imageUrl && <span className="error-msg">{errors.imageUrl}</span>}
+              {errors.imageUrl && (
+                <span className="error-msg">{errors.imageUrl}</span>
+              )}
             </div>
 
             <div className="form-actions-row">
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={loading}
-              >
-                <FaRegPaperPlane /> 
-                {loading 
-                  ? (isEditing ? "Updating..." : "Publishing...") 
-                  : (isEditing ? "Update Post" : "Publish Post")
-                }
+              <button type="submit" className="submit-btn" disabled={loading}>
+                <FaRegPaperPlane />
+                {loading
+                  ? isEditing
+                    ? "Updating..."
+                    : "Publishing..."
+                  : isEditing
+                    ? "Update Post"
+                    : "Publish Post"}
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="cancel-btn"
                 onClick={handleClearForm}
               >
