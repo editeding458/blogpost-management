@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./Login.css";
@@ -11,7 +11,7 @@ const Login = () => {
     password: "",
   });
 
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
@@ -53,10 +53,8 @@ const Login = () => {
     e.preventDefault();
 
     if (validate()) {
-      // Get all users from localStorage
       const users = JSON.parse(localStorage.getItem("authData")) || [];
 
-      // Find user with matching email and password
       const authenticatedUser = users.find(
         (user) =>
           user.email === loginData.email &&
@@ -64,7 +62,6 @@ const Login = () => {
       );
 
       if (authenticatedUser) {
-        // Store current login session data
         localStorage.setItem("loginData", JSON.stringify(loginData));
         toast.success("Login successfully");
         navigate("/Dashboard");
@@ -80,7 +77,6 @@ const Login = () => {
       <h5>Sign in to your account</h5>
 
       <form onSubmit={handleSubmit}>
-        {/* Email */}
         <div className="form-group">
           <label htmlFor="email">Email Address</label>
           <input
@@ -94,7 +90,6 @@ const Login = () => {
           {errors.email && <span className="error">{errors.email}</span>}
         </div>
 
-        {/* Password with eye icon */}
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <div style={{ position: "relative" }}>

@@ -7,24 +7,18 @@ import {
   FaTimes,
   FaUser,
 } from "react-icons/fa";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Navbar from "../components/Navbar";
 import "./CreatePost.css";
 
 const CreatePost = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const editPost = location.state?.post;
-  const isEditing = location.state?.isEditing || false;
+  const { id } = useParams();
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Get current logged in user from loginData
   const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
-
-  // Get all users from authData
   const allUsers = JSON.parse(localStorage.getItem("authData") || "[]");
-
-  // Find the current logged in user by email
   const currentUser = allUsers.find((user) => user.email === loginData.email);
   const userName = currentUser?.username || "";
 
@@ -40,45 +34,72 @@ const CreatePost = () => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Load post data if editing
   useEffect(() => {
-    if (isEditing && editPost) {
+    if (id) {
+      setIsEditing(true);
+      fetchPostToEdit();
+    } else {
+      setIsEditing(false);
       setFormData({
-        title: editPost.title || "",
-        author: editPost.author || userName,
-        description: editPost.description || "",
-        imageUrl: editPost.image || "",
+        title: "",
+        author: userName,
+        description: "",
+        imageUrl: "",
         imageTab: "url",
       });
-      setImagePreview(editPost.image || null);
+      setImagePreview(null);
     }
-  }, [isEditing, editPost, userName]);
+  }, [id, userName]);
+
+  const fetchPostToEdit = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:3000/posts/${id}`);
+      if (response.ok) {
+        const post = await response.json();
+        setFormData({
+          title: post.title || "",
+          author: post.author || userName,
+          description: post.description || "",
+          imageUrl: post.image || "",
+          imageTab:
+            post.image && post.image.startsWith("http") ? "url" : "file",
+        });
+        setImagePreview(post.image || null);
+      } else {
+        toast.error("Failed to fetch post for editing");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error fetching post for edit:", error);
+      toast.error("Error loading post");
+      navigate("/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const validate = () => {
     const newErrors = {};
 
-    // Title validation
     if (!formData.title.trim()) {
       newErrors.title = "Post title is required.";
     } else if (formData.title.length < 3) {
       newErrors.title = "Minimum 3 characters required.";
     }
 
-    // Author validation
     if (!formData.author.trim()) {
       newErrors.author = "Author name is required.";
     } else if (formData.author.length < 2) {
       newErrors.author = "Minimum 2 characters required.";
     }
 
-    // Description validation
     if (!formData.description.trim()) {
       newErrors.description = "Description is required.";
     } else if (formData.description.length < 10) {
       newErrors.description = "Minimum 10 characters required.";
     }
 
-    // Image validation
     if (!formData.imageUrl.trim()) {
       newErrors.imageUrl = "Cover image is required.";
     }
@@ -92,7 +113,6 @@ const CreatePost = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Clear error for this field
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -104,7 +124,6 @@ const CreatePost = () => {
   const handleImageUrlChange = (e) => {
     const url = e.target.value;
     setFormData({ ...formData, imageUrl: url });
-    // Clear image error
     if (errors.imageUrl) {
       setErrors({
         ...errors,
@@ -125,7 +144,6 @@ const CreatePost = () => {
       reader.onloadend = () => {
         setImagePreview(reader.result);
         setFormData((prev) => ({ ...prev, imageUrl: reader.result }));
-        // Clear image error
         if (errors.imageUrl) {
           setErrors({
             ...errors,
@@ -149,7 +167,6 @@ const CreatePost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form before submission
     if (!validate()) {
       toast.error("Please fix the errors in the form.");
       return;
@@ -168,20 +185,15 @@ const CreatePost = () => {
           month: "long",
           day: "numeric",
         }),
+        createdAt: isEditing ? undefined : new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-
-      if (isEditing && editPost) {
-        postData.createdAt = editPost.createdAt || new Date().toISOString();
-      } else {
-        postData.createdAt = new Date().toISOString();
-      }
 
       let url = "http://localhost:3000/posts";
       let method = "POST";
 
-      if (isEditing && editPost?.id) {
-        url = `http://localhost:3000/posts/${editPost.id}`;
+      if (isEditing && id) {
+        url = `http://localhost:3000/posts/${id}`;
         method = "PUT";
       }
 
@@ -216,15 +228,8 @@ const CreatePost = () => {
   };
 
   const handleClearForm = () => {
-    if (isEditing && editPost) {
-      setFormData({
-        title: editPost.title || "",
-        author: editPost.author || userName,
-        description: editPost.description || "",
-        imageUrl: editPost.image || "",
-        imageTab: "url",
-      });
-      setImagePreview(editPost.image || null);
+    if (isEditing && id) {
+      fetchPostToEdit();
     } else {
       setFormData({
         title: "",
@@ -327,7 +332,7 @@ const CreatePost = () => {
                   <div className="image-source-tabs">
                     <button
                       type="button"
-                      className={`tab-btn ${formData.imageTab === "url" ? "active" : ""}`}
+                      className={`tab-btn ${formData.imageTab === "url" ? "tab-btn-active" : ""}`}
                       onClick={() =>
                         setFormData({ ...formData, imageTab: "url" })
                       }
@@ -336,7 +341,7 @@ const CreatePost = () => {
                     </button>
                     <button
                       type="button"
-                      className={`tab-btn ${formData.imageTab === "upload" ? "active" : ""}`}
+                      className={`tab-btn ${formData.imageTab === "upload" ? "tab-btn-active" : ""}`}
                       onClick={() =>
                         setFormData({ ...formData, imageTab: "upload" })
                       }
@@ -423,5 +428,4 @@ const CreatePost = () => {
     </div>
   );
 };
-
 export default CreatePost;

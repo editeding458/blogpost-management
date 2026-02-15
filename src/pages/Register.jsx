@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./Register.css";
@@ -81,22 +81,17 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      // Check if user already exists
       if (checkIfUserExists(formData.email)) {
         toast.error("User with this email already exists!");
         return;
       }
 
-      // Get existing users or initialize empty array
       const existingUsers = JSON.parse(localStorage.getItem("authData")) || [];
 
-      // Remove confirmPassword from user data
       const { confirmPassword, ...userData } = formData;
 
-      // Add new user to the array
       const updatedUsers = [...existingUsers, userData];
 
-      // Save updated users array to localStorage
       localStorage.setItem("authData", JSON.stringify(updatedUsers));
 
       toast.success("Registration successfully...!");
@@ -150,7 +145,6 @@ const Register = () => {
           {errors.phone && <span className="error-msg">{errors.phone}</span>}
         </div>
 
-        {/* Password with eye icon */}
         <div className="form-group">
           <label htmlFor="password">Password</label>
           <div style={{ position: "relative" }}>
@@ -183,7 +177,6 @@ const Register = () => {
           )}
         </div>
 
-        {/* Confirm Password with eye icon */}
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
           <div style={{ position: "relative" }}>
