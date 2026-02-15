@@ -419,7 +419,7 @@ const CreatePost = () => {
                 className="cancel-btn"
                 onClick={handleClearForm}
               >
-                Reset Form
+                Clear Form
               </button>
             </div>
           </form>
