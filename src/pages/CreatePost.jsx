@@ -34,6 +34,19 @@ const CreatePost = () => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Allowed image formats
+  const allowedFormats = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/bmp',
+    'image/webp',
+    'image/svg+xml'
+  ];
+
+  const allowedExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i;
+
   useEffect(() => {
     if (id) {
       setIsEditing(true);
@@ -102,6 +115,13 @@ const CreatePost = () => {
 
     if (!formData.imageUrl.trim()) {
       newErrors.imageUrl = "Cover image is required.";
+    } else {
+      // Validate image format for URL
+      if (formData.imageTab === "url") {
+        if (!allowedExtensions.test(formData.imageUrl)) {
+          newErrors.imageUrl = "Please provide a valid image URL (JPG, JPEG, PNG, GIF, BMP, WEBP, SVG)";
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -124,22 +144,60 @@ const CreatePost = () => {
   const handleImageUrlChange = (e) => {
     const url = e.target.value;
     setFormData({ ...formData, imageUrl: url });
+    
+    // Validate URL format
     if (errors.imageUrl) {
       setErrors({
         ...errors,
         imageUrl: "",
       });
     }
+    
     if (url) {
-      setImagePreview(url);
+      // Check if URL has valid image extension
+      if (allowedExtensions.test(url)) {
+        setImagePreview(url);
+      } else {
+        setImagePreview(null);
+        if (url.trim()) {
+          setErrors({
+            ...errors,
+            imageUrl: "Invalid image format. Please use JPG, JPEG, PNG, GIF, BMP, WEBP, or SVG",
+          });
+        }
+      }
     } else {
       setImagePreview(null);
     }
   };
 
+  const validateImageFile = (file) => {
+    // Check file type
+    if (!allowedFormats.includes(file.type)) {
+      toast.error("Invalid file format. Please upload JPG, JPEG, PNG, GIF, BMP, WEBP, or SVG");
+      return false;
+    }
+    
+    // Check file size (optional - 5MB limit)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error("File size too large. Maximum size is 5MB");
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file before processing
+      if (!validateImageFile(file)) {
+        // Reset file input
+        e.target.value = '';
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -150,6 +208,10 @@ const CreatePost = () => {
             imageUrl: "",
           });
         }
+        toast.success(`${file.name} uploaded successfully!`);
+      };
+      reader.onerror = () => {
+        toast.error("Error reading file. Please try again.");
       };
       reader.readAsDataURL(file);
     }
@@ -162,6 +224,10 @@ const CreatePost = () => {
   const removeImage = () => {
     setImagePreview(null);
     setFormData((prev) => ({ ...prev, imageUrl: "" }));
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -351,35 +417,45 @@ const CreatePost = () => {
                   </div>
 
                   {formData.imageTab === "url" && (
-                    <div className="input-wrapper">
-                      <FaLink className="input-icon" />
-                      <input
-                        type="url"
-                        name="imageUrl"
-                        value={formData.imageUrl}
-                        onChange={handleImageUrlChange}
-                        className={`form-control ${errors.imageUrl ? "error" : ""}`}
-                        placeholder="Paste image URL here (e.g., https://...)"
-                      />
-                    </div>
+                    <>
+                      <div className="input-wrapper">
+                        <FaLink className="input-icon" />
+                        <input
+                          type="url"
+                          name="imageUrl"
+                          value={formData.imageUrl}
+                          onChange={handleImageUrlChange}
+                          className={`form-control ${errors.imageUrl ? "error" : ""}`}
+                          placeholder="Paste image URL here (e.g., https://...)"
+                        />
+                      </div>
+                      <small className="format-hint">
+                        Supported formats: JPG, JPEG, PNG, GIF, BMP, WEBP, SVG
+                      </small>
+                    </>
                   )}
 
                   {formData.imageTab === "upload" && (
-                    <div
-                      className={`image-upload-area ${errors.imageUrl ? "error" : ""}`}
-                      onClick={triggerFileSelect}
-                    >
-                      <FaCloudUploadAlt className="upload-icon" />
-                      <p>Click to upload image from your device</p>
-                      <input
-                        ref={fileInputRef}
-                        id="imageUpload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        style={{ display: "none" }}
-                      />
-                    </div>
+                    <>
+                      <div
+                        className={`image-upload-area ${errors.imageUrl ? "error" : ""}`}
+                        onClick={triggerFileSelect}
+                      >
+                        <FaCloudUploadAlt className="upload-icon" />
+                        <p>Click to upload image from your device</p>
+                        <small className="upload-hint">
+                          Supported: JPG, JPEG, PNG, GIF, BMP, WEBP, SVG (Max 5MB)
+                        </small>
+                        <input
+                          ref={fileInputRef}
+                          id="imageUpload"
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,image/jpeg,image/png,image/gif,image/bmp,image/webp,image/svg+xml"
+                          onChange={handleImageUpload}
+                          style={{ display: "none" }}
+                        />
+                      </div>
+                    </>
                   )}
                 </>
               ) : (
@@ -388,6 +464,11 @@ const CreatePost = () => {
                     src={imagePreview}
                     alt="Preview"
                     className="image-preview"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/placeholder-image.jpg'; // Add a placeholder image
+                      toast.error("Failed to load image. Please check the URL or file.");
+                    }}
                   />
                   <button
                     type="button"
@@ -428,4 +509,5 @@ const CreatePost = () => {
     </div>
   );
 };
+
 export default CreatePost;

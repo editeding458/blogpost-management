@@ -6,9 +6,11 @@ import {
 import { ToastContainer } from "react-toastify";
 import "./App.css";
 import AuthGuard from "./auth/AuthGuard.jsx";
+import Analytics from "./pages/Analytics.jsx"; // Analytics import karein
 import CreatePost from "./pages/CreatePost";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login.jsx";
+import PostDetails from "./pages/PostDetails.jsx";
 import Register from "./pages/Register.jsx";
 
 const DefaultRoute = () => {
@@ -50,6 +52,14 @@ function App() {
       ),
     },
     {
+      path: "/analytics", 
+      element: (
+        <AuthGuard required={true}>
+          <Analytics />
+        </AuthGuard>
+      ),
+    },
+    {
       path: "/create-post",
       element: (
         <AuthGuard required={true}>
@@ -62,6 +72,14 @@ function App() {
       element: (
         <AuthGuard required={true}>
           <CreatePost />
+        </AuthGuard>
+      ),
+    },
+    {
+      path: "/post/:id",
+      element: (
+        <AuthGuard required={true}>
+          <PostDetails />
         </AuthGuard>
       ),
     },

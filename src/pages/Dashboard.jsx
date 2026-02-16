@@ -11,13 +11,16 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleCreatePostClick = (e) => {
-    e.preventDefault();
+  const handleCreatePostClick = () => {
     navigate("/create-post");
   };
 
   const handleEditPost = (post) => {
     navigate(`/edit-post/${post.id}`);
+  };
+
+  const handleReadMore = (post) => {
+    navigate(`/post/${post.id}`);
   };
 
   const fetchPosts = async () => {
@@ -70,16 +73,12 @@ const Dashboard = () => {
   }
 
   const totalPosts = posts.length;
-
   const userPosts = posts.filter((post) => {
     if (!currentUser) return false;
-
     const postAuthor = (post.author || "").toLowerCase().trim();
     const currentUserLower = currentUser.toLowerCase().trim();
-
     return postAuthor === currentUserLower;
   }).length;
-
   const communityPosts = totalPosts - userPosts;
 
   return (
@@ -102,12 +101,10 @@ const Dashboard = () => {
             <h3>Total Posts</h3>
             <span className="dash-number">{totalPosts}</span>
           </div>
-
           <div className="dash-card">
             <h3>Your Stories</h3>
             <span className="dash-number">{userPosts}</span>
           </div>
-
           <div className="dash-card">
             <h3>Community Posts</h3>
             <span className="dash-number">{communityPosts}</span>
@@ -137,7 +134,6 @@ const Dashboard = () => {
                       alt={post.title}
                       className="post-card-image"
                     />
-
                     <div className="post-actions">
                       <button
                         className="action-btn edit-btn"
@@ -146,7 +142,6 @@ const Dashboard = () => {
                       >
                         <MdEdit size={22} color="#ffffff" />
                       </button>
-
                       <button
                         className="action-btn delete-btn"
                         title="Delete Post"
@@ -156,7 +151,6 @@ const Dashboard = () => {
                       </button>
                     </div>
                   </div>
-
                   <div className="post-card-content">
                     <div className="post-meta">
                       <span className="post-author">
@@ -169,10 +163,14 @@ const Dashboard = () => {
                           ).toLocaleDateString()}
                       </span>
                     </div>
-
                     <h3 className="post-card-title">{post.title}</h3>
                     <p className="post-card-description">{post.description}</p>
-                    <button className="read-more-btn">Read More</button>
+                    <button
+                      className="read-more-btn"
+                      onClick={() => handleReadMore(post)}
+                    >
+                      Read More
+                    </button>
                   </div>
                 </div>
               ))
