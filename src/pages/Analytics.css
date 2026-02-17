@@ -10,7 +10,7 @@
 }
 
 .analytics-header {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .analytics-header h1 {
@@ -67,7 +67,7 @@
 .analytics-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .analytics-table th,
@@ -77,13 +77,14 @@
   color: black;
   border-bottom: 1px solid #e2e8f0;
 }
+
 .analytics-table th {
-  background: #f1f5f9;
+  background-color: #f1f5f9;
   color: #475569;
   font-weight: 600;
 }
 
-.analytics-table tbody tr:hover {
+.analytics-table tr:hover {
   background-color: #f8fafc;
 }
 
@@ -92,46 +93,84 @@
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
 .page-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border: 1px solid #e2e8f0;
   background: white;
   color: #475569;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 40px;
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #8b5cf6;  /* Purple color on hover */
+  color: white;
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
 }
 
-.page-btn:active {
-  background: #e2e8f0;
+.page-btn.active {
+  background: #7c3aed;  /* Darker purple for active state */
   color: white;
-  border-color: #6366f1;
+  border-color: #7c3aed;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(124, 58, 237, 0.4);
 }
+
+.page-btn:active:not(:disabled) {
+  background: #6d28d9;  /* Even darker purple when clicked */
+  border-color: #6d28d9;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(109, 40, 217, 0.4);
+}
+
 .page-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #94a3b8;
 }
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
-  font-size: 1.2rem;
+
+.loading {
+  text-align: center;
+  padding: 3rem;
   color: #64748b;
+  font-size: 1.2rem;
 }
+
+.no-data {
+  text-align: center;
+  color: #64748b;
+  padding: 2rem;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
   .charts-container {
     grid-template-columns: 1fr;
   }
+
   .analytics-main {
     padding: 1rem;
+  }
+  
+  .pagination {
+    gap: 0.3rem;
+  }
+  
+  .page-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    min-width: 35px;
   }
 }
