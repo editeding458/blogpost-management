@@ -2,21 +2,47 @@ import {
   FaBlog,
   FaChartBar,
   FaHome,
+  FaMoon,
   FaPlusSquare,
   FaSignOutAlt,
+  FaSun
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 import "./Navbar.css";
 
 const Navbar = ({ onLogout }) => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  // Fixed: Safely parse localStorage data
+  const loginData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("loginData") || "{}");
+    } catch {
+      return {};
+    }
+  })();
 
-  const allUsers = JSON.parse(localStorage.getItem("authData") || "[]");
+  const allUsers = (() => {
+    try {
+      const data = localStorage.getItem("authData");
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  })();
 
-  const currentUser = allUsers.find((user) => user.email === loginData.email);
-  const userName = currentUser?.username || "User";
+  // Fixed: Check if allUsers is an array before using find
+  let userName = "User";
+  if (loginData?.email) {
+    if (Array.isArray(allUsers)) {
+      const currentUser = allUsers.find((user) => user.email === loginData.email);
+      userName = currentUser?.username || loginData.email.split("@")[0];
+    } else {
+      userName = loginData.email.split("@")[0];
+    }
+  }
 
   const handleCreatePostClick = (e) => {
     e.preventDefault();
@@ -62,6 +88,11 @@ const Navbar = ({ onLogout }) => {
 
         <div className="navbar-actions">
           <span className="user-name">Hi, {userName}</span>
+
+          <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle theme">
+            {theme === 'light' ? <FaMoon /> : <FaSun />}
+          </button>
+
           <button className="logout-btn" onClick={onLogout}>
             <FaSignOutAlt /> Logout
           </button>

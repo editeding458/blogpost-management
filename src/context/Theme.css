@@ -176,14 +176,18 @@
 [data-theme='dark'] .post-details-page {
     background-color: #1e293b;
 }
+[data-theme='dark'] .full-post {
+    background-color: #1e293b;
+      border-color: #6366f1;
+        box-shadow:  2px 2px 2px 2px rgba(236, 236, 236, 0.1);
+}
 
 [data-theme='dark'] .post-full-title,
-[data-theme='dark'] .author-name
+[data-theme='dark'] .author-name,  
 [data-theme='dark'] .post-body,
 [data-theme='dark'] .post-share span {
     color: #f8fafc;
 }
-
 [data-theme='dark'] .post-date-row {
     color: #94a3b8;
 }

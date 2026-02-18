@@ -6,7 +6,7 @@ import {
 import { ToastContainer } from "react-toastify";
 import "./App.css";
 import AuthGuard from "./auth/AuthGuard.jsx";
-import Analytics from "./pages/Analytics.jsx"; // Analytics import karein
+import Analytics from "./pages/Analytics.jsx";
 import CreatePost from "./pages/CreatePost";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login.jsx";

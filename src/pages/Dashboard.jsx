@@ -62,16 +62,38 @@ const Dashboard = () => {
     }
   };
 
-  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
-  const authData = JSON.parse(localStorage.getItem("authData") || "[]");
+  // Fixed: Safely parse localStorage data
+  const loginData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("loginData") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+  const authData = (() => {
+    try {
+      const data = localStorage.getItem("authData");
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  })();
 
   let currentUser = "";
 
   if (loginData?.email) {
-    const foundUser = authData.find((user) => user.email === loginData.email);
-    currentUser = foundUser?.username || loginData.email.split("@")[0];
+    // Fixed: Check if authData is an array before using find
+    if (Array.isArray(authData)) {
+      const foundUser = authData.find((user) => user.email === loginData.email);
+      currentUser = foundUser?.username || loginData.email.split("@")[0];
+    } else {
+      // If authData is not an array, use email username as fallback
+      currentUser = loginData.email.split("@")[0];
+    }
   }
 
+  // Fixed: Safely filter posts
   const totalPosts = posts.length;
   const userPosts = posts.filter((post) => {
     if (!currentUser) return false;

@@ -17,10 +17,32 @@ const CreatePost = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
 
-  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
-  const allUsers = JSON.parse(localStorage.getItem("authData") || "[]");
-  const currentUser = allUsers.find((user) => user.email === loginData.email);
-  const userName = currentUser?.username || "";
+  // Fixed: Safely parse localStorage data
+  const loginData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("loginData") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+  const allUsers = (() => {
+    try {
+      const data = localStorage.getItem("authData");
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  // Fixed: Check if allUsers is an array before using find
+  let userName = "";
+  if (Array.isArray(allUsers)) {
+    const currentUser = allUsers.find((user) => user.email === loginData.email);
+    userName = currentUser?.username || "";
+  } else {
+    userName = loginData.email?.split("@")[0] || "";
+  }
 
   const [formData, setFormData] = useState({
     title: "",
