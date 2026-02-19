@@ -1,16 +1,14 @@
 .analytics-page {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background: #f8fafc;
 }
 
 .analytics-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  padding: 40px 60px;
 }
 
 .analytics-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .analytics-header h1 {
@@ -31,16 +29,22 @@
 }
 
 .chart-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
 .chart-card h3 {
-  margin-bottom: 1.5rem;
+  font-size: 18px;
+  margin-bottom: 20px;
   color: #334155;
-  font-size: 1.25rem;
 }
 
 .chart-wrapper {
@@ -52,7 +56,7 @@
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
 }
 
 .posts-table-section h3 {
@@ -62,145 +66,86 @@
 
 .table-wrapper {
   overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #e9eef2;
 }
 
 .analytics-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1rem;
+  font-size: 15px;
 }
 
-.analytics-table th,
-.analytics-table td {
-  text-align: left;
-  padding: 1rem;
-  color: black;
-  border-bottom: 1px solid #e2e8f0;
+.analytics-table thead tr {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .analytics-table th {
-  background-color: #f1f5f9;
-  color: #475569;
+  padding: 1rem;
+  text-align: left;
+  color: #1e293b;
   font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.analytics-table tr:hover {
+.analytics-table td {
+  padding: 1rem;
+  text-align: left;
+  color: #334155;
+  border-bottom: 1px solid #edf2f7;
+  vertical-align: middle;
+}
+
+.analytics-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.analytics-table tbody tr:hover {
   background-color: #f8fafc;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
-}
-
-.page-btn {
-  padding: 0.6rem 1.2rem;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: #475569;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-  font-weight: 500;
-  min-width: 40px;
-}
-
-.page-btn:hover:not(:disabled) {
-  background: #8b5cf6; 
-  color: white;
-  border-color: #8b5cf6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
-}
-
-.page-btn.active {
-  background: #7c3aed;
-  color: white;
-  border-color: #7c3aed;
-  font-weight: 600;
-  box-shadow: 0 4px 8px rgba(124, 58, 237, 0.4);
-}
-
-.page-btn:active:not(:disabled) {
-  background: #6d28d9; 
-  border-color: #6d28d9;
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(109, 40, 217, 0.4);
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+/* Fix for empty action cells */
+.analytics-table td:empty::before {
+  content: "—";
   color: #94a3b8;
+  font-style: italic;
 }
 
-.loading {
-  text-align: center;
-  padding: 3rem;
-  color: #64748b;
-  font-size: 1.2rem;
+/* Ensure all rows have proper structure */
+.analytics-table tbody tr {
+  display: table-row;
 }
 
-.no-data {
-  text-align: center;
-  color: #64748b;
-  padding: 2rem;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  .charts-container {
-    grid-template-columns: 1fr;
-  }
-
-  .analytics-main {
-    padding: 1rem;
-  }
-
-  .pagination {
-    gap: 0.3rem;
-  }
-
-  .page-btn {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.85rem;
-    min-width: 35px;
-  }
-}
-
+/* Action buttons wrapper - keeping original button styles */
 .action-buttons {
   display: flex;
+  align-items: center;
   gap: 10px;
-  background: transparent; 
+  min-height: 40px;
 }
 
+/* Original button styles - unchanged */
 .action-buttons button {
-  background: transparent !important; 
+  background: transparent !important;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
-  padding: 8px 12px; 
+  padding: 8px 12px;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px; 
+  border-radius: 6px;
 }
 
-
 .action-buttons button.edit-btn:hover {
-  background-color: #3b82f6 !important; 
+  background-color: #3b82f6 !important;
   color: white;
   transform: scale(1.1);
 }
-
 
 .action-buttons button.delete-btn:hover {
   background-color: #ef4444 !important;
@@ -208,13 +153,80 @@
   transform: scale(1.1);
 }
 
-.action-buttons.edit-btn, 
-.action-buttons.delete-btn {
-  background: transparent !important;
+/* Pagination */
+.pagination {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.action-buttons.edit-btn,
-.action-buttons.delete-btn {
-  background: transparent !important;
-  box-shadow: none;
+.page-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: black;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.page-btn.active {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .analytics-main {
+    padding: 1rem;
+  }
+  
+  .charts-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .table-wrapper {
+    margin: 0 -0.5rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .analytics-table th,
+  .analytics-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .action-buttons {
+    gap: 5px;
+  }
+  
+  .action-buttons button {
+    padding: 4px 8px;
+    font-size: 1rem;
+  }
 }

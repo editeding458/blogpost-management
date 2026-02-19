@@ -5,6 +5,7 @@ import {
   FaMoon,
   FaPlusSquare,
   FaSignOutAlt,
+  FaStar,
   FaSun
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -83,6 +84,14 @@ const Navbar = ({ onLogout }) => {
             }
           >
             <FaChartBar className="nav-icon" /> Analytics
+          </NavLink>
+          <NavLink
+            to="/favorites"
+            className={({ isActive }) =>
+              isActive ? "navbar-item active" : "navbar-item"
+            }
+          >
+            <FaStar className="nav-icon" /> Favorites
           </NavLink>
         </div>
 

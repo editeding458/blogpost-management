@@ -9,6 +9,7 @@ import AuthGuard from "./auth/AuthGuard.jsx";
 import Analytics from "./pages/Analytics.jsx";
 import CreatePost from "./pages/CreatePost";
 import Dashboard from "./pages/Dashboard";
+import Favorites from "./pages/Favorites.jsx";
 import Login from "./pages/Login.jsx";
 import PostDetails from "./pages/PostDetails.jsx";
 import Register from "./pages/Register.jsx";
@@ -83,6 +84,14 @@ function App() {
         </AuthGuard>
       ),
     },
+    {
+  path: "/favorites",
+  element: (
+    <AuthGuard required={true}>
+      <Favorites />
+    </AuthGuard>
+  ),
+},
   ]);
 
   return (
