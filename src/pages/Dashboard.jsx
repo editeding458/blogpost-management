@@ -22,6 +22,7 @@ const Dashboard = () => {
   const handleReadMore = (post) => {
     navigate(`/post/${post.id}`);
   };
+  
 
   const fetchPosts = async () => {
     try {
@@ -156,6 +157,9 @@ const Dashboard = () => {
                       alt={post.title}
                       className="post-card-image"
                     />
+                    <button className={`favorite-btn ${favorites.include(post.id)?'active':''}`}>
+                      <FaStar size={20} color="#ffffff"/>
+                    </button>
                     <div className="post-actions">
                       <button
                         className="action-btn edit-btn"
