@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaStar } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,6 +10,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]); 
 
   const handleCreatePostClick = () => {
     navigate("/create-post");
@@ -22,7 +23,6 @@ const Dashboard = () => {
   const handleReadMore = (post) => {
     navigate(`/post/${post.id}`);
   };
-  
 
   const fetchPosts = async () => {
     try {
@@ -40,6 +40,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchPosts();
+    // Load favorites from localStorage on component mount
+    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    setFavorites(savedFavorites);
   }, []);
 
   const handleLogout = () => {
@@ -61,6 +64,28 @@ const Dashboard = () => {
         toast.error("Failed to delete post");
       }
     }
+  };
+
+  // Updated toggle favorite function with localStorage
+  const handleToggleFavorite = (e, postId) => {
+    e.stopPropagation(); // Prevent event bubbling
+    
+    let newFavorites;
+    if (favorites.includes(postId)) {
+      newFavorites = favorites.filter(id => id !== postId);
+      toast.info("Removed from favorites");
+    } else {
+      newFavorites = [...favorites, postId];
+      toast.success("Added to favorites");
+    }
+    
+    setFavorites(newFavorites);
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+  };
+
+  // Add image error handler
+  const handleImageError = (e) => {
+    e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
   };
 
   // Fixed: Safely parse localStorage data
@@ -153,12 +178,16 @@ const Dashboard = () => {
                 <div className="post-card" key={post.id}>
                   <div className="post-image-container">
                     <img
-                      src={post.image}
+                      src={post.image || 'https://via.placeholder.com/300x200?text=No+Image'}
                       alt={post.title}
                       className="post-card-image"
+                      onError={handleImageError}
                     />
-                    <button className={`favorite-btn ${favorites.include(post.id)?'active':''}`}>
-                      <FaStar size={20} color="#ffffff"/>
+                    <button 
+                      className={`favorite-btn ${favorites.includes(post.id) ? 'active' : ''}`}
+                      onClick={(e) => handleToggleFavorite(e, post.id)}
+                    >
+                      <FaStar size={20} color={favorites.includes(post.id) ? "#FFD700" : "#ffffff"} />
                     </button>
                     <div className="post-actions">
                       <button
